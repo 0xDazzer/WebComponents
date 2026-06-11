@@ -7,4 +7,3 @@ import './components/profile-directory.mjs';
 import './components/profile-search.mjs';
 import './components/profile-list.mjs';
 import './components/profile-item.mjs';
-import './components/profile-create-dialog.mjs';
