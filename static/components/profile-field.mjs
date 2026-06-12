@@ -1,16 +1,7 @@
-const template = document.getElementById('profile-field');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileField extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.labelEl = this.shadowRoot.getElementById('label');
-    this.inputEl = this.shadowRoot.getElementById('input');
-    this.textareaEl = this.shadowRoot.getElementById('textarea');
-    this.errorEl = this.shadowRoot.getElementById('error');
-
+  connectedCallback() {
     const emit = () => {
       const event = new CustomEvent('field-change', {
         detail: { name: this.fieldName, value: this.value },
@@ -19,15 +10,8 @@ class ProfileField extends HTMLElement {
       });
       this.dispatchEvent(event);
     };
-    this.inputEl.addEventListener('input', emit);
-    this.textareaEl.addEventListener('input', emit);
-  }
-
-  static get observedAttributes() {
-    return ['name', 'label', 'type', 'value', 'error', 'multiline', 'disabled'];
-  }
-
-  connectedCallback() {
+    this.elements.inputEl.addEventListener('input', emit);
+    this.elements.textareaEl.addEventListener('input', emit);
     this.render();
   }
 
@@ -41,8 +25,8 @@ class ProfileField extends HTMLElement {
 
   get value() {
     return this.hasAttribute('multiline')
-      ? this.textareaEl.value
-      : this.inputEl.value;
+      ? this.elements.textareaEl.value
+      : this.elements.inputEl.value;
   }
 
   render() {
@@ -50,19 +34,42 @@ class ProfileField extends HTMLElement {
     const disabled = this.hasAttribute('disabled');
     const id = `field-${this.fieldName}`;
 
-    this.inputEl.hidden = multiline;
-    this.textareaEl.hidden = !multiline;
+    this.elements.inputEl.hidden = multiline;
+    this.elements.textareaEl.hidden = !multiline;
 
-    const active = multiline ? this.textareaEl : this.inputEl;
-    this.labelEl.setAttribute('for', id);
+    const active = multiline ? this.elements.textareaEl : this.elements.inputEl;
+    this.elements.labelEl.setAttribute('for', id);
     active.id = id;
-    this.labelEl.textContent = this.getAttribute('label') || this.fieldName;
+    this.elements.labelEl.textContent =
+      this.getAttribute('label') || this.fieldName;
 
-    if (!multiline) this.inputEl.type = this.getAttribute('type') || 'text';
+    if (!multiline) {
+      this.elements.inputEl.type = this.getAttribute('type') || 'text';
+    }
     active.value = this.getAttribute('value') || '';
     active.disabled = disabled;
-    this.errorEl.setAttribute('message', this.getAttribute('error') || '');
+    this.elements.errorEl.setAttribute(
+      'message',
+      this.getAttribute('error') || '',
+    );
   }
 }
 
-customElements.define('profile-field', ProfileField);
+defineCustomElement(ProfileField, {
+  name: 'profile-field',
+  observedAttributes: [
+    'name',
+    'label',
+    'type',
+    'value',
+    'error',
+    'multiline',
+    'disabled',
+  ],
+  elements: {
+    labelEl: 'label',
+    inputEl: 'input',
+    textareaEl: 'textarea',
+    errorEl: 'error',
+  },
+});

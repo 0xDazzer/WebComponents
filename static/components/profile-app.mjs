@@ -1,20 +1,10 @@
 import { getProfile } from '/api.mjs';
 import { buildProfileState } from '/shared/profile-domain.mjs';
-
-const template = document.getElementById('profile-app');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileApp extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.main = this.shadowRoot.getElementById('main');
-    this.homeLink = this.shadowRoot.getElementById('homeLink');
-  }
-
   connectedCallback() {
-    this.homeLink.addEventListener('click', (event) => {
+    this.elements.homeLink.addEventListener('click', (event) => {
       event.preventDefault();
       window.navigation.navigate('/');
     });
@@ -37,10 +27,10 @@ class ProfileApp extends HTMLElement {
   }
 
   async renderRoute(pathname) {
-    this.main.replaceChildren();
+    this.elements.main.replaceChildren();
 
     if (pathname === '/') {
-      this.main.append(document.createElement('profile-directory'));
+      this.elements.main.append(document.createElement('profile-directory'));
       return;
     }
 
@@ -58,7 +48,7 @@ class ProfileApp extends HTMLElement {
     const error = document.createElement('div');
     error.className = 'error';
     error.textContent = 'Route not found';
-    this.main.append(error);
+    this.elements.main.append(error);
   }
 
   renderCreate() {
@@ -69,7 +59,7 @@ class ProfileApp extends HTMLElement {
     form.addEventListener('profile-created', (event) => {
       window.navigation.navigate(`/profile/${event.detail.id}`);
     });
-    this.main.replaceChildren(form);
+    this.elements.main.replaceChildren(form);
   }
 
   async renderProfile(username) {
@@ -78,13 +68,16 @@ class ProfileApp extends HTMLElement {
       const error = document.createElement('div');
       error.className = 'error';
       error.textContent = 'Profile not found';
-      this.main.append(error);
+      this.elements.main.append(error);
       return;
     }
     const form = document.createElement('profile-form');
     form.state = result;
-    this.main.append(form);
+    this.elements.main.append(form);
   }
 }
 
-customElements.define('profile-app', ProfileApp);
+defineCustomElement(ProfileApp, {
+  name: 'profile-app',
+  elements: { main: 'main', homeLink: 'homeLink' },
+});

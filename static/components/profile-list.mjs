@@ -1,3 +1,5 @@
+import { defineCustomElement } from '/define-custom-element.mjs';
+
 class ProfileList extends HTMLElement {
   set items(value) {
     this._items = Array.isArray(value) ? value : [];
@@ -31,4 +33,7 @@ class ProfileList extends HTMLElement {
   }
 }
 
-customElements.define('profile-list', ProfileList);
+defineCustomElement(ProfileList, {
+  name: 'profile-list',
+  shadow: false,
+});

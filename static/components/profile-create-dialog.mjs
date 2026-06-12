@@ -1,48 +1,37 @@
 import { buildProfileState } from '/shared/profile-domain.mjs';
 import { createProfile } from '/api.mjs';
-
-const template = document.getElementById('profile-create-dialog');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileCreateDialog extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.dialog = this.shadowRoot.getElementById('dialog');
-    this.form = this.shadowRoot.getElementById('form');
-    this.cancelBtn = this.shadowRoot.getElementById('cancel');
-    this.createBtn = this.shadowRoot.getElementById('create');
-    this.state = buildProfileState({});
-  }
+  state = buildProfileState({});
 
   connectedCallback() {
-    this.form.state = this.state;
-    this.form.editableId = true;
-    this.form.addEventListener('profile-state-change', (event) => {
+    this.elements.form.state = this.state;
+    this.elements.form.editableId = true;
+    this.elements.form.addEventListener('profile-state-change', (event) => {
       this.state = event.detail.state;
-      this.createBtn.disabled = !this.state.valid;
+      this.elements.createBtn.disabled = !this.state.valid;
     });
-    this.cancelBtn.addEventListener('click', () => this.close());
-    this.createBtn.addEventListener('click', () => this.submit());
+    this.elements.cancelBtn.addEventListener('click', () => this.close());
+    this.elements.createBtn.addEventListener('click', () => this.submit());
   }
 
   open() {
     this.state = buildProfileState({});
-    this.form.state = this.state;
-    this.createBtn.disabled = !this.state.valid;
-    this.dialog.showModal();
+    this.elements.form.state = this.state;
+    this.elements.createBtn.disabled = !this.state.valid;
+    this.elements.dialog.showModal();
   }
 
   close() {
-    this.dialog.close();
+    this.elements.dialog.close();
   }
 
   async submit() {
     if (!this.state.valid) return;
     const result = await createProfile(this.state.profile);
     if (!result.ok) {
-      this.form.serverErrors = result.errors;
+      this.elements.form.serverErrors = result.errors;
       return;
     }
     this.dispatchEvent(
@@ -56,4 +45,12 @@ class ProfileCreateDialog extends HTMLElement {
   }
 }
 
-customElements.define('profile-create-dialog', ProfileCreateDialog);
+defineCustomElement(ProfileCreateDialog, {
+  name: 'profile-create-dialog',
+  elements: {
+    dialog: 'dialog',
+    form: 'form',
+    cancelBtn: 'cancel',
+    createBtn: 'create',
+  },
+});

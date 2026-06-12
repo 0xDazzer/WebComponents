@@ -1,33 +1,20 @@
 import { profileFields, buildProfileState } from '/shared/profile-domain.mjs';
 import { saveProfile, createProfile } from '/api.mjs';
-
-const template = document.getElementById('profile-form');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileForm extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.formEl = this.shadowRoot.getElementById('form');
-    this.titleEl = this.shadowRoot.getElementById('title');
-    this.fieldsEl = this.shadowRoot.getElementById('fields');
-    this.summaryEl = this.shadowRoot.getElementById('summary');
-    this.saveBtn = this.shadowRoot.getElementById('save');
-    this.statusEl = this.shadowRoot.getElementById('status');
-    this.fieldEls = new Map();
-    this._state = buildProfileState({});
-    this._serverErrors = {};
-    this._editableId = false;
-  }
+  fieldEls = new Map();
+  _state = buildProfileState({});
+  _serverErrors = {};
+  _editableId = false;
 
   connectedCallback() {
     this.renderFields();
-    this.formEl.addEventListener('submit', (event) => {
+    this.elements.formEl.addEventListener('submit', (event) => {
       event.preventDefault();
       this.handleSave();
     });
-    this.formEl.addEventListener('field-change', (event) => {
+    this.elements.formEl.addEventListener('field-change', (event) => {
       this.updateField(event.detail.name, event.detail.value);
     });
     this.render();
@@ -78,7 +65,7 @@ class ProfileForm extends HTMLElement {
       this.fieldEls.set(name, field);
       nodes.push(field);
     }
-    this.fieldsEl.replaceChildren(...nodes);
+    this.elements.fieldsEl.replaceChildren(...nodes);
   }
 
   updateField(name, value) {
@@ -132,13 +119,15 @@ class ProfileForm extends HTMLElement {
     const result = await saveProfile(username, this.state.profile);
     if (!result.ok) {
       this.serverErrors = result.errors;
-      this.statusEl.textContent = '';
+      this.elements.statusEl.textContent = '';
       return;
     }
     this._state = result;
-    this.statusEl.textContent = 'Saved';
+    this.elements.statusEl.textContent = 'Saved';
     setTimeout(() => {
-      if (this.statusEl.textContent === 'Saved') this.statusEl.textContent = '';
+      if (this.elements.statusEl.textContent === 'Saved') {
+        this.elements.statusEl.textContent = '';
+      }
     }, 1500);
     this.dispatchEvent(
       new CustomEvent('profile-saved', {
@@ -158,10 +147,10 @@ class ProfileForm extends HTMLElement {
     let title = 'Profile';
     if (this.isCreate) title = 'Create Profile';
     else if (profile.id) title = `Edit: ${profile.id}`;
-    this.titleEl.textContent = title;
+    this.elements.titleEl.textContent = title;
 
-    this.saveBtn.textContent = this.isCreate ? 'Create' : 'Save';
-    this.saveBtn.disabled = !this.state.valid;
+    this.elements.saveBtn.textContent = this.isCreate ? 'Create' : 'Save';
+    this.elements.saveBtn.disabled = !this.state.valid;
 
     for (const [name, metadata] of Object.entries(profileFields)) {
       if (metadata.computed) continue;
@@ -183,8 +172,18 @@ class ProfileForm extends HTMLElement {
       }
     }
 
-    this.summaryEl.data = this.state.computed || {};
+    this.elements.summaryEl.data = this.state.computed || {};
   }
 }
 
-customElements.define('profile-form', ProfileForm);
+defineCustomElement(ProfileForm, {
+  name: 'profile-form',
+  elements: {
+    formEl: 'form',
+    titleEl: 'title',
+    fieldsEl: 'fields',
+    summaryEl: 'summary',
+    saveBtn: 'save',
+    statusEl: 'status',
+  },
+});

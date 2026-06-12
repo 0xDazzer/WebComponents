@@ -1,15 +1,8 @@
 import { profileFields } from '/shared/profile-domain.mjs';
 
-const template = document.getElementById('profile-summary');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileSummary extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-  }
-
   set data(value) {
     this._data = value || {};
     this.render();
@@ -35,4 +28,4 @@ class ProfileSummary extends HTMLElement {
   }
 }
 
-customElements.define('profile-summary', ProfileSummary);
+defineCustomElement(ProfileSummary, { name: 'profile-summary' });

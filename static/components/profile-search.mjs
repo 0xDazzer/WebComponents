@@ -1,15 +1,7 @@
-const template = document.getElementById('profile-search');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileSearch extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.nameInput = this.shadowRoot.getElementById('name');
-    this.emailInput = this.shadowRoot.getElementById('email');
-    this.timer = null;
-  }
+  timer = null;
 
   connectedCallback() {
     const emit = () => {
@@ -26,9 +18,12 @@ class ProfileSearch extends HTMLElement {
         this.dispatchEvent(event);
       }, 250);
     };
-    this.nameInput.addEventListener('input', emit);
-    this.emailInput.addEventListener('input', emit);
+    this.elements.nameInput.addEventListener('input', emit);
+    this.elements.emailInput.addEventListener('input', emit);
   }
 }
 
-customElements.define('profile-search', ProfileSearch);
+defineCustomElement(ProfileSearch, {
+  name: 'profile-search',
+  elements: { nameInput: 'name', emailInput: 'email' },
+});

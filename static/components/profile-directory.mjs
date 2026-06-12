@@ -1,26 +1,16 @@
 import { searchProfiles, deleteProfile } from '/api.mjs';
-
-const template = document.getElementById('profile-directory');
+import { defineCustomElement } from '/define-custom-element.mjs';
 
 class ProfileDirectory extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    const content = template.content.cloneNode(true);
-    this.shadowRoot.append(content);
-    this.search = this.shadowRoot.getElementById('search');
-    this.list = this.shadowRoot.getElementById('list');
-    this.createBtn = this.shadowRoot.getElementById('create');
-    this.query = { name: '', email: '' };
-  }
+  query = { name: '', email: '' };
 
   connectedCallback() {
     this.load();
-    this.search.addEventListener('search-change', (event) => {
+    this.elements.search.addEventListener('search-change', (event) => {
       this.query = event.detail;
       this.load();
     });
-    this.list.addEventListener('open-profile', (event) => {
+    this.elements.list.addEventListener('open-profile', (event) => {
       this.dispatchEvent(
         new CustomEvent('navigate-profile', {
           detail: { path: `/profile/${event.detail.id}` },
@@ -32,7 +22,7 @@ class ProfileDirectory extends HTMLElement {
     this.list.addEventListener('delete-profile', (event) => {
       this.removeProfile(event.detail.id);
     });
-    this.createBtn.addEventListener('click', () => {
+    this.elements.createBtn.addEventListener('click', () => {
       this.dispatchEvent(
         new CustomEvent('navigate-profile', {
           detail: { path: '/new' },
@@ -45,7 +35,7 @@ class ProfileDirectory extends HTMLElement {
 
   async load() {
     const { items } = await searchProfiles(this.query);
-    this.list.items = items;
+    this.elements.list.items = items;
   }
 
   async removeProfile(id) {
@@ -55,4 +45,7 @@ class ProfileDirectory extends HTMLElement {
   }
 }
 
-customElements.define('profile-directory', ProfileDirectory);
+defineCustomElement(ProfileDirectory, {
+  name: 'profile-directory',
+  elements: { search: 'search', list: 'list', createBtn: 'create' },
+});
