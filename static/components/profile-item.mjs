@@ -3,7 +3,7 @@ import { defineCustomElement } from '/define-custom-element.mjs';
 class ProfileItem extends HTMLElement {
   connectedCallback() {
     this.render();
-    this.openBtn.addEventListener('click', () => {
+    this.elements.openBtn.addEventListener('click', () => {
       const event = new CustomEvent('open-profile', {
         detail: { id: this.getAttribute('profile-id') || '' },
         bubbles: true,
@@ -11,7 +11,7 @@ class ProfileItem extends HTMLElement {
       });
       this.dispatchEvent(event);
     });
-    this.deleteBtn.addEventListener('click', () => {
+    this.elements.deleteBtn.addEventListener('click', () => {
       const event = new CustomEvent('delete-profile', {
         detail: { id: this.getAttribute('profile-id') || '' },
         bubbles: true,

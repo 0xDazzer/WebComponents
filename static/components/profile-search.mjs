@@ -9,8 +9,8 @@ class ProfileSearch extends HTMLElement {
       this.timer = setTimeout(() => {
         const event = new CustomEvent('search-change', {
           detail: {
-            name: this.nameInput.value,
-            email: this.emailInput.value,
+            name: this.elements.nameInput.value,
+            email: this.elements.emailInput.value,
           },
           bubbles: true,
           composed: true,

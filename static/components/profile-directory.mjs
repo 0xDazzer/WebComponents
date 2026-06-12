@@ -19,7 +19,7 @@ class ProfileDirectory extends HTMLElement {
         }),
       );
     });
-    this.list.addEventListener('delete-profile', (event) => {
+    this.elements.list.addEventListener('delete-profile', (event) => {
       this.removeProfile(event.detail.id);
     });
     this.elements.createBtn.addEventListener('click', () => {
